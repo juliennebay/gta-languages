@@ -15,28 +15,31 @@ function App() {
         onChange={e => setLanguage(e.target.value.toLowerCase())}
         placeholder="type language"
       ></input>
-      <div>
-        search results :{" "}
-        {TorontoData.filter(
-          d =>
-            !d.TEXT_NAME_NOM.includes("English") &&
-            !d.TEXT_NAME_NOM.includes("French")
-        )
-          .filter(d => d.TEXT_NAME_NOM.toLowerCase().includes(selectedLanguage))
-          .map(d =>
-            JSON.stringify({
-              total: d.T_DATA_DONNEE,
-              ID: d.HIER_ID,
-              text_name_nom: d.TEXT_NAME_NOM,
+      {selectedLanguage.length ? (
+        <div>
+          search results :{" "}
+          {TorontoData.filter(
+            d =>
+              !d.TEXT_NAME_NOM.includes("English") &&
+              !d.TEXT_NAME_NOM.includes("French")
+          )
+            .filter(d =>
+              d.TEXT_NAME_NOM.toLowerCase().includes(selectedLanguage)
+            )
+            .map(d => ({
               label: TorontoData.find(
                 obj => obj.HIER_ID === d.HIER_ID.slice(0, 5)
-              ).TEXT_NAME_NOM
-            })
-          )
-          .map((d, i) => (
-            <div key={i}>{d}</div>
-          ))}
-      </div>
+              ).TEXT_NAME_NOM,
+              total: d.T_DATA_DONNEE
+            }))
+            .map((d, i) => (
+              <div key={i}>
+                <div> {d.label}</div>
+                <div> {d.total}</div>
+              </div>
+            ))}
+        </div>
+      ) : null}
     </div>
   );
 }
