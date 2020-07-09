@@ -1,45 +1,73 @@
 import React, { useState } from "react";
 import "./App.css";
 import TorontoData from "./Toronto.json";
+import BramptonData from "./Brampton.json";
+import MississaugaData from "./Mississauga.json";
 
-//0: mother tongue
-//1: spoken at home
-//2: total speakers of this language (including those not included in 0 & 1)
+const DATA_OBJECT = {
+  Toronto: TorontoData,
+  Brampton: BramptonData,
+  Mississauga: MississaugaData
+};
 
-function App() {
-  const [selectedLanguage, setLanguage] = useState("");
+function CityData({ data, language }) {
   return (
-    <div className="App">
-      <h1>The # of speakers of a non-official (Eng/Fr) language in Toronto</h1>
-      <input
-        onChange={e => setLanguage(e.target.value.toLowerCase())}
-        placeholder="type language"
-      ></input>
-      {selectedLanguage.length ? (
-        <div>
-          search results :{" "}
-          {TorontoData.filter(
+    <table>
+      <thead>
+        <tr>
+          <th>Matched String</th>
+          <th>Label</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data
+          .filter(
             d =>
               !d.TEXT_NAME_NOM.includes("English") &&
               !d.TEXT_NAME_NOM.includes("French")
           )
-            .filter(d =>
-              d.TEXT_NAME_NOM.toLowerCase().includes(selectedLanguage)
-            )
-            .map(d => ({
-              label: TorontoData.find(
-                obj => obj.HIER_ID === d.HIER_ID.slice(0, 5)
-              ).TEXT_NAME_NOM,
-              total: d.T_DATA_DONNEE
-            }))
-            .map((d, i) => (
-              <div key={i}>
-                <div> {d.label}</div>
-                <div> {d.total}</div>
-              </div>
-            ))}
-        </div>
-      ) : null}
+          .filter(d => d.TEXT_NAME_NOM.toLowerCase().includes(language))
+          .map(d => ({
+            matchedStr: d.TEXT_NAME_NOM,
+            label: data.find(obj => obj.HIER_ID === d.HIER_ID.slice(0, 5))
+              .TEXT_NAME_NOM,
+            total: d.T_DATA_DONNEE
+          }))
+          .sort((a, b) => a.matchedStr.localeCompare(b.matchedStr))
+          .map((d, i) => (
+            <tr key={i}>
+              <td>{d.matchedStr}</td>
+              <td>{d.label}</td>
+              <td>{d.total}</td>
+            </tr>
+          ))}
+      </tbody>
+    </table>
+  );
+}
+
+function App() {
+  const [selectedLanguage, setLanguage] = useState("");
+
+  return (
+    <div className="App">
+      <h1>The # of speakers of a non-official (Eng/Fr) language in the GTA</h1>
+      <input
+        onChange={e => setLanguage(e.target.value.toLowerCase())}
+        placeholder="type language"
+      ></input>
+      {selectedLanguage.length
+        ? Object.keys(DATA_OBJECT).map(cityName => (
+            <div>
+              <h3> search results for: {cityName}</h3>
+              <CityData
+                data={DATA_OBJECT[cityName]}
+                language={selectedLanguage}
+              />
+            </div>
+          ))
+        : null}
     </div>
   );
 }
